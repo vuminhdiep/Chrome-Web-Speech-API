@@ -30,12 +30,55 @@ var messages = {
     msg: 'Content copy to clipboard successfully.',
     class: 'alert-success'},
 }
+window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
 
 var final_transcript = '';
 var recognizing = false;
 var ignore_onend;
 var start_timestamp;
 var recognition;
+
+const synth = window.speechSynthesis;
+const icon = document.querySelector('i.fa.fa-microphone')
+const sound = document.querySelector('.sound');
+let paragraph = document.createElement('p');
+let container = document.querySelector('.text-box');
+container.appendChild(paragraph);
+
+
+
+const speak = (action) => {
+  utterThis = new SpeechSynthesisUtterance(action());
+  synth.speak(utterThis);
+};
+
+const getTime = () => {
+  const time = new Date(Date.now());
+  return `the time is ${time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
+};
+
+const getDate = () => {
+  const time = new Date(Date.now())
+  return `today is ${time.toLocaleDateString()}`;
+};
+
+const getTheWeather = (speech) => {
+  
+  const destination = speech.split(" ");
+  fetch(`http://api.openweathermap.org/data/2.5/weather?q=${destination[destination.length - 1]}&appid=58b6f7c78582bffab3936dac99c31b25&units=metric`) 
+  .then(function(response){
+    return response.json();
+  })
+  .then(function(weather){
+    if (weather.cod === '404') {
+      utterThis = new SpeechSynthesisUtterance(`I cannot find the weather for ${destination[destination.length - 1]}`);
+      synth.speak(utterThis);
+      return;
+    }
+    utterThis = new SpeechSynthesisUtterance(`the weather condition in ${weather.name} is mostly full of ${weather.weather[0].description} at a temperature of ${weather.main.temp} degrees Celcius`);
+    synth.speak(utterThis);
+  });
+};
 
 $( document ).ready(function() {
   for (var i = 0; i < langs.length; i++) {
@@ -50,7 +93,7 @@ $( document ).ready(function() {
   } else {
     showInfo('start');  
     start_button.style.display = 'inline-block';
-    recognition = new webkitSpeechRecognition();
+    recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
 
@@ -102,13 +145,33 @@ $( document ).ready(function() {
 
     recognition.onresult = function(event) {
       var interim_transcript = '';
+      
       for (var i = event.resultIndex; i < event.results.length; ++i) {
+        const speechToText = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          final_transcript += event.results[i][0].transcript;
-        } else {
-          interim_transcript += event.results[i][0].transcript;
+          
+          if (speechToText.includes('what is the time')) {
+            speak(getTime);
+            
+        };
+        
+        if (speechToText.includes('what is today\'s date')) {
+            speak(getDate);
+            
+        };
+        
+        if (speechToText.includes('what is the weather in')) {
+            getTheWeather(speechToText);
+            
+        };
+        final_transcript += speechToText;  
+      } 
+      else {
+          interim_transcript += speechToText;
         }
       }
+        
+   
       final_transcript = capitalize(final_transcript);
       final_span.innerHTML = linebreak(final_transcript);
       interim_span.innerHTML = linebreak(interim_transcript);
