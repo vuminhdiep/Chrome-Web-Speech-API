@@ -2,7 +2,7 @@
   <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Web Speech APIU</title>
+    <title>Web Speech API</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="style/web-speech.css">
@@ -14,8 +14,11 @@
               <h3 class="text-center">Web Speech API Demo</h3>
               <div id="info"></div>
               <div class="float-right">
-                <button id="start_button">
-                  <img id="start_img" src="images/mic.gif" alt="Start"></button>
+                <div class="text-box" contenteditable="true"></div> <!--text box which will contain spoken text -->
+                <button id="start_button" >
+                  <img id="start_img" src="images/mic.gif" alt="Start" >
+                  <i class="fa fa-microphone"></i>
+                </button>
               </div>
               <div id="results">
                 <span id="final_span" class="final"></span>
@@ -36,6 +39,7 @@
 
           </div>
       </main>
+      <audio class="sound" ></audio>
       <script src="js/languages.js"></script>
       <script src="js/web-speech-api.js"></script>
   </body>
